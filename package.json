@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@ant-design/icons": "^5.4.0",
+    "crypto-js": "^4.2.0",
+    "highcharts": "^11.4.8",
+    "highcharts-react-official": "^3.2.1",
+    "papaparse": "^5.4.1",
+    "react-highlight-words": "^0.20.0"
+  }
+}
