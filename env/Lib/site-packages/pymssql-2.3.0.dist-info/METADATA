@@ -1,0 +1,196 @@
+Metadata-Version: 2.1
+Name: pymssql
+Version: 2.3.0
+Summary: DB-API interface to Microsoft SQL Server for Python. (new Cython-based version)
+Author: Damien Churchill
+Author-email: damoxc@gmail.com
+Maintainer: Mikhail Terekhov
+Maintainer-email: termim@gmail.com
+License: LGPL
+Project-URL: Documentation, http://pymssql.readthedocs.io
+Project-URL: Source, https://github.com/pymssql/pymssql
+Project-URL: Changelog, https://github.com/pymssql/pymssql/blob/master/ChangeLog.rst
+Keywords: mssql,SQL Server,database,DB-API
+Platform: any
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Database
+Classifier: Topic :: Database :: Database Engines/Servers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+
+
+pymssql - DB-API interface to Microsoft SQL Server
+==================================================
+
+.. image:: https://github.com/pymssql/pymssql/workflows/Linux/badge.svg
+        :target: https://github.com/pymssql/pymssql/actions?query=workflow%3A%22Linux%22
+
+.. image:: https://github.com/pymssql/pymssql/workflows/macOS/badge.svg
+        :target: https://github.com/pymssql/pymssql/actions?query=workflow%3A%22macOS%22
+
+.. image:: https://github.com/pymssql/pymssql/workflows/Windows/badge.svg
+        :target: https://github.com/pymssql/pymssql/actions?query=workflow%3A%22Windows%22
+
+.. image:: http://img.shields.io/pypi/dm/pymssql.svg
+        :target: https://pypi.python.org/pypi/pymssql/
+
+.. image:: http://img.shields.io/pypi/v/pymssql.svg
+        :target: https://pypi.python.org/pypi/pymssql/
+
+A simple database interface for `Python`_ that builds on top of `FreeTDS`_ to
+provide a Python DB-API (`PEP-249`_) interface to `Microsoft SQL Server`_.
+
+.. _Microsoft SQL Server: http://www.microsoft.com/sqlserver/
+.. _Python: http://www.python.org/
+.. _PEP-249: http://www.python.org/dev/peps/pep-0249/
+.. _FreeTDS: http://www.freetds.org/
+
+Detailed information on pymssql is available on the website:
+
+`pymssql.readthedocs.io <https://pymssql.readthedocs.io/en/stable/>`_
+
+New development is happening on GitHub at:
+
+`github.com/pymssql/pymssql <https://github.com/pymssql/pymssql>`_
+
+There is a Google Group for discussion at:
+
+`groups.google.com <https://groups.google.com/forum/?fromgroups#!forum/pymssql>`_
+
+
+Getting started
+===============
+
+pymssql wheels are available from PyPi. To install it run:
+
+.. code-block:: bash
+
+    pip install -U pip
+    pip install pymssql
+
+Most of the times this should be all what's needed.
+The official pymssql wheels bundle a static copy of FreeTDS
+and have SSL support so they can be used to connect to Azure.
+
+.. note::
+   On some Linux distributions `pip` version is too old to support all
+   the flavors of manylinux wheels, so upgrading `pip` is necessary.
+   An example of such distributions would be Ubuntu 18.04 or
+   Python3.6 module in RHEL8 and CentOS8.
+
+
+Basic example
+=============
+
+.. code-block:: python
+
+    conn = pymssql.connect(server, user, password, "tempdb")
+    cursor = conn.cursor(as_dict=True)
+
+    cursor.execute('SELECT * FROM persons WHERE salesrep=%s', 'John Doe')
+    for row in cursor:
+        print("ID=%d, Name=%s" % (row['id'], row['name']))
+
+    conn.close()
+
+
+Recent Changes
+==============
+
+Version 2.3.0 - 2024-04-06 - Mikhail Terekhov
+=============================================
+
+General
+-------
+
+- Add python 3.12 support (fix #851). Thanks to Raphael Jacob.
+- Update FreeTDS to 1.4.10.
+- Add read_only parameter for connection.
+- Add encryption parameter to connect.
+- Add use_datetime2 parameter to connect.
+- Use utf-8 for connection properties.
+- Implement batching in executemany based on optional batch_size parameter.
+  with default equal arraysize cursor attribute (closes #332, #462).
+- Build aarch64 wheels. Thanks to Jun Tang.
+- Build musllinux wheels.
+- Some documentation fixes. Thanks to Casey Korver and Quentin LEGAY.
+- FAQ update: #877.
+- Add stubs  (closes #767).
+- Fix DBAPI-2.0 compliance - DataError must be a subclass of DatabaseError.
+- Fix DBAPI-2.0 compliance: rename `batchsize` cursor attribute to `arraysize`.
+- Implement DATETIMEOFFSET handling for stored procedures.
+- Implement DATETIMEOFFSET handling for insert and select queries (fixes #649).
+- Return instance of datetime.datetime on select from SQLDATETIM4, SQLDATETIME, SQLDATETIME2 columns (closes #662, #695, #792, #844).
+
+Bug fixes
+---------
+
+- Fix SQLDATETIME2 handling in convert_python_value().
+- Use four digits for the year in SP args binding (fix #454).
+- Fix convert_python_value to work with datetime.date. Thanks to Testsr.
+- Check if C compiler is installed if check for clock_gettime fails (fix #825).
+- Add missing `charset` parameter in the `_substitute_params` method when
+  calling `ensure_bytes` (fix #650). Thans to Andrey Yuroshev.
+- Fix empty, zero or None parameter substitution. (fix #609).
+
+Internals
+---------
+
+- Add tests for fetchall(), fetchmany(), fetchone() and next() with SP.
+- Add test for #134.
+- Require Cython>3.0.7.
+- Use Cython 3 for compilation.
+- Use docker image for MSSQL2019 as a default for tests.
+- Take FreeTDS version for PyPI wheels from pyproject.toml.
+- Check sdist with twine.
+- Use OpenSSL-1.1.1.2100 for Windows x86 wheels. Thanks to PrimozGodec (fixes #839).
+- Use OpenSSL-3.1.1 for Windows x64 wheels (FreeTDS build fails with OpenSSL-3.2.1).
+- Add SQLTIME and SQLDATETIME2 to convert_python_value.
+- Use dbanydatecrack() function instead of dbdatecrack().
+- Replace DEF with cdef enum for buffer array size (compatibility with Cython 3).
+- Remove references to tox. Thanks to Christoph Wegener.
+- Update readthedocs configuration.
+- Add tests for timeout in wait callback (#305).
+- Clean up some legacy FreeTDS shims.
+- Add tests for tds_version parameter.
+- Move check for clock_gettime to dev/ccompiler.py.
+- Remove some Python2 remnants.
+- Move FreeTDS version from workflow files to pyproject.toml.
+- Move exceptions into separate module.
+- Use strftime for date & time conversion.
+- Simplify parameters quoting.
+- Add tests for _quote_simple_value.
+
+Version 2.2.11 - 2023-12-03  - Mikhail Terekhov
+===============================================
+
+General
+-------
+
+- Use FreeTDS-1.4.9 for official wheels on PyPi.
+- Add workflow for aarch64 wheel. Thanks to juntangc (fix #692, #759, #791, #819, #826, #858).
+- Add datetime.date to SQLDATE conversion.
+- Add encription parameter to connect (fix  #797).
+
+Bug fixes
+---------
+
+- Fix version parsing in development.
+- Add missing `charset` parameter when formatting query (fix #650).
+- Use four digits for the year in SP args binding (fix #454).
+- Fix convert_python_value to work with datetime.date (fix #811).
